@@ -90,9 +90,13 @@ Educational and experimental — focused on understanding neural network interna
 
 ## Run (simple)
 
+> **Inside root folder**
 ```bash
-g++ main.cpp -o main
-./main
+mkdir build
+cd build
+cmake ..
+cmake --build .
+./genetic_algo
 ```
 
 ---
