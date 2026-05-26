@@ -98,7 +98,6 @@ g++ main.cpp -o main
 ---
 
 ## TODO's
-- Better file organization + CMakeLists.txt file
 - Start implementing GA
 - Define problem to solve (classification - is stock price going up or down?)
 - Some nice TUI?? --> Distant future

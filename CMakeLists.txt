@@ -1,0 +1,38 @@
+cmake_minimum_required(VERSION 3.20)
+
+project(genetic_algo
+    VERSION 1.0
+    LANGUAGES CXX
+)
+
+# ----------------------------------
+# C++ Standard
+# ----------------------------------
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# ----------------------------------
+# neural_network library
+# ----------------------------------
+
+# Since implementation is in headers/tpp files,
+# INTERFACE is usually the best choice.
+add_library(neural_network INTERFACE)
+
+target_include_directories(neural_network
+    INTERFACE
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+# ----------------------------------
+# Executable
+# ----------------------------------
+add_executable(genetic_algo
+    src/main.cpp
+)
+
+target_link_libraries(genetic_algo
+    PRIVATE
+        neural_network
+)
