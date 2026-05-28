@@ -1,3 +1,5 @@
 build/
 ideas.md
 main
+data/
+run.sh

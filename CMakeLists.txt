@@ -26,6 +26,19 @@ target_include_directories(neural_network
 )
 
 # ----------------------------------
+# data library
+# ----------------------------------
+add_library(problems
+    src/problems/price_direction.cpp
+)
+
+target_include_directories(problems
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+
+# ----------------------------------
 # Executable
 # ----------------------------------
 add_executable(genetic_algo
@@ -35,4 +48,5 @@ add_executable(genetic_algo
 target_link_libraries(genetic_algo
     PRIVATE
         neural_network
+        problems
 )
