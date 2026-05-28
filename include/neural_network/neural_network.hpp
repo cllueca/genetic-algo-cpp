@@ -15,8 +15,8 @@ public:
     size_t output_size;
     size_t num_hidden_layers;
 
-    std::vector<layers::HiddenLayer<T>> hidden_layers;
-    layers::HiddenLayer<T> output_layer;
+    std::vector<layers::DenseLayer<T>> hidden_layers;
+    layers::DenseLayer<T> output_layer;
 
 public:
     NeuralNetwork(

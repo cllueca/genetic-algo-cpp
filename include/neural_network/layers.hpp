@@ -11,7 +11,7 @@ template<typename T>
 T random_value();
 
 template<typename T>
-class HiddenLayer {
+class DenseLayer {
 public:
     size_t rows, cols;
     std::vector<T> data;   // weights: shape (rows, cols), row-major
@@ -19,7 +19,7 @@ public:
     activations::Activation activation;
 
 public:
-    HiddenLayer(
+    DenseLayer(
         size_t r,
         size_t c,
         activations::Activation act = activations::Activation::ReLU
