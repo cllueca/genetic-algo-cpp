@@ -26,7 +26,7 @@ target_include_directories(neural_network
 )
 
 # ----------------------------------
-# data library
+# problems library
 # ----------------------------------
 add_library(problems
     src/problems/price_direction.cpp
@@ -34,6 +34,16 @@ add_library(problems
 
 target_include_directories(problems
     PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+# ----------------------------------
+# ga library
+# ----------------------------------
+add_library(ga INTERFACE)
+
+target_include_directories(ga
+    INTERFACE
         ${PROJECT_SOURCE_DIR}/include
 )
 
@@ -49,4 +59,5 @@ target_link_libraries(genetic_algo
     PRIVATE
         neural_network
         problems
+        ga
 )
