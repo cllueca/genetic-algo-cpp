@@ -19,6 +19,8 @@ It may not be the most efficient way of solving the given problem, but this is j
 * Genome encoding / decoding for genetic algorithms
 * Softmax implemented with numerical stability
 * Debug-friendly architecture and weight printing
+* Stock price direction prediction problem (binary classification)
+* Technical indicator computation from raw NAV data (EMA, RSI, momentum, volatility)
 
 ---
 
@@ -31,6 +33,35 @@ output[j] = activation( Σ (input[i] * W[i][j]) + bias[j] )
 ```
 
 Softmax is applied across the full output vector rather than element-wise.
+
+---
+
+## Problem: Stock Price Direction
+
+The current use case is binary classification — predicting whether a fund's NAV will go up or down the next trading day. Input data is a CSV with `Date` and `NAV` columns:
+
+```
+Date,NAV
+2006-06-07T00:00:00.000Z,78.275
+2006-06-08T00:00:00.000Z,76.922
+...
+```
+
+Seven technical features are derived from the raw prices and fed into the network:
+
+| Feature | Description |
+|---|---|
+| `nav / ema20 - 1` | Distance from 20-day EMA (short-term trend) |
+| `nav / ema50 - 1` | Distance from 50-day EMA (medium-term trend) |
+| `nav / ema200 - 1` | Distance from 200-day EMA (long-term trend) |
+| `momentum5` | Rate of change over 5 days: `nav[T] / nav[T-5] - 1` |
+| `momentum20` | Rate of change over 20 days: `nav[T] / nav[T-20] - 1` |
+| `rsi14` | 14-period RSI, normalised to [0, 1] |
+| `volatility20` | 20-day rolling std-dev of log-returns |
+
+The label is `direction = true` if the next day's NAV is higher. The network outputs a single Sigmoid-activated value, where > 0.5 means "UP".
+
+The first 199 entries (warm-up period for EMA-200) and the last entry (no future label) are dropped from the dataset.
 
 ---
 
@@ -49,18 +80,24 @@ nn.set_genome(genome);           // reload
 ## Example Usage
 
 ```cpp
-NeuralNetwork<float> nn(
-    3, 2,
-    {4, 4},
-    {Activation::ReLU, Activation::Tanh},
-    Activation::Softmax
+// Load and preprocess stock data
+auto prices = pd::load_data("data/IE0031786142.csv");
+
+// Build network: 7 inputs → 3 hidden layers → 1 sigmoid output
+nn::NeuralNetwork<float> nn(
+    7, 1,
+    {300, 150, 50},
+    {Activation::ReLU, Activation::ReLU, Activation::Tanh},
+    Activation::Sigmoid
 );
 
-std::vector<float> input = {0.5f, -0.3f, 1.2f};
-auto output = nn.forward(input);
+// Run a forward pass on one sample
+std::vector<float> input = prices[450].to_features();
+std::vector<float> output = nn.forward(input);
 
-for (float v : output)
-    std::cout << v << " ";
+// output[0] > 0.5 → predict UP, else DOWN
+bool predicted_up = output[0] > 0.5f;
+bool actual_up    = prices[450].direction;
 ```
 
 ---
@@ -103,5 +140,5 @@ cmake --build .
 
 ## TODO's
 - Start implementing GA
-- Define problem to solve (classification - is stock price going up or down?)
+- ✅ Define problem to solve (classification — is stock price going up or down?)
 - Some nice TUI?? --> Distant future
