@@ -14,11 +14,25 @@ using Activation = nn::activations::Activation;
 namespace ga {
 
     template<typename T>
+    struct IndividualFitness {
+        size_t index;
+        float fitness;
+    };
+
+    template<typename T>
+    struct ElitismResponse {
+        std::vector<nn::NeuralNetwork<T>> survivors;
+        int removed;
+    };
+
+    template<typename T>
     class GeneticAlgorithm {
     public:
         // Network topology — stored so the GA can replenish dead candidates
         int input_len;
         int output_len;
+        float mutation_prob;
+        float elitism_pct;
         std::vector<size_t>     layers_dim;
         std::vector<Activation> layers_activations;
         Activation              output_activation;
@@ -30,6 +44,8 @@ namespace ga {
             int candidates,
             int input_len,
             int output_len,
+            float mutation_prob,
+            float elitism_pct,
             std::vector<size_t>     layers_dim,
             std::vector<Activation> layers_activations,
             Activation              output_activation
@@ -44,13 +60,26 @@ namespace ga {
         // Fixed-size thread pool — created once, reused every generation
         ThreadPool pool_;
 
+        void initialize_population(std::vector<nn::NeuralNetwork<T>>& dest, int count) const;
+
+        std::vector<IndividualFitness<T>> get_population_fitness(
+            const std::vector<nn::NeuralNetwork<T>>& population,
+            const std::vector<pd::StockPrice>& data
+        );
+
         float evaluate_fitness(
             const nn::NeuralNetwork<T>& network,
             const std::vector<pd::StockPrice>& data
         ) const;
 
-        // Spawn `count` randomly-initialised networks and append them to `dest`
-        void replenish(std::vector<nn::NeuralNetwork<T>>& dest, int count) const;
+        ElitismResponse<T> get_elite_individuals(
+            std::vector<IndividualFitness<T>>& individuals
+        );
+
+        void replenish_population(
+            std::vector<nn::NeuralNetwork<T>>& elite_members,
+            int count
+        );
 
         // Print the top-n best and worst scores from a sorted score vector
         void print_score_summary(
