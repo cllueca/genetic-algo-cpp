@@ -13,6 +13,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # ----------------------------------
+# Threads (required for std::thread)
+# ----------------------------------
+find_package(Threads REQUIRED)
+
+# ----------------------------------
 # neural_network library
 # ----------------------------------
 
@@ -39,14 +44,21 @@ target_include_directories(problems
 
 # ----------------------------------
 # ga library
+# thread_pool.cpp is the only compiled source; the rest is header/tpp only.
 # ----------------------------------
-add_library(ga INTERFACE)
+add_library(ga
+    src/ga/thread_pool.cpp
+)
 
 target_include_directories(ga
-    INTERFACE
+    PUBLIC
         ${PROJECT_SOURCE_DIR}/include
 )
 
+target_link_libraries(ga
+    PUBLIC
+        Threads::Threads
+)
 
 # ----------------------------------
 # Executable

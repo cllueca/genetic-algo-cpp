@@ -3,6 +3,7 @@
 #include <neural_network/neural_network.hpp>
 #include <neural_network/activations.hpp>
 #include <problems/price_direction.hpp>
+#include <ga/thread_pool.hpp>
 #include <vector>
 #include <cmath>
 
@@ -40,6 +41,9 @@ namespace ga {
         );
 
     private:
+        // Fixed-size thread pool — created once, reused every generation
+        ThreadPool pool_;
+
         float evaluate_fitness(
             const nn::NeuralNetwork<T>& network,
             const std::vector<pd::StockPrice>& data

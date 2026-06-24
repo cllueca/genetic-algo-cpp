@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ga/ga.hpp>
-#include <thread>
 #include <algorithm>
 #include <iostream>
 
@@ -24,7 +23,8 @@ namespace ga {
         output_len(output_len),
         layers_dim(std::move(layers_dim)),
         layers_activations(std::move(layers_activations)),
-        output_activation(output_activation)
+        output_activation(output_activation),
+        pool_()   // spins up hardware_concurrency() workers
     {
         // Initialize population
         replenish(population, candidates);
@@ -42,16 +42,17 @@ namespace ga {
     ) {
         for (int round = 0; round < iterations; ++round) {
 
-            // ── Evaluate population in parallel ───────────────────────────────────
+            // ── Evaluate population via the thread pool ───────────────────────────
+            // Each individual gets its own task. Workers pull from the queue as they
+            // finish — at most hardware_concurrency() tasks run at once.
             std::vector<float> scores(population.size());
-            std::vector<std::thread> threads;
 
             for (size_t i = 0; i < population.size(); ++i)
-                threads.emplace_back([&, i]() {
+                pool_.enqueue([&, i]() {
                     scores[i] = evaluate_fitness(population[i], data);
                 });
 
-            for (auto& t : threads) t.join();
+            pool_.wait_all();   // block until every individual has been scored
 
             // ── Compute mean ──────────────────────────────────────────────────────
             float total = 0.0f;
