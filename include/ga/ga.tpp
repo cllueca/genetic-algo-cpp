@@ -68,12 +68,27 @@ void run(
 
         // Get scores mean
         float total_scores = 0.0f;
-        for (size_t i = 0; i < population.size(); ++i) {
-            std::cout << "Candidate " << i + 1 << " - Fitness: " << scores[i] << '\n';
-            total_scores += scores[i];
-        }
-
+        for (float score: scores)
+            total_scores += score;
         float mean = total_scores / static_cast<float>(population.size());
+
+        // Get top n best and worst scores to display them
+        std::vector<float> sorted_scores = scores;
+        std::sort(sorted_scores.begin(), sorted_scores.end());
+
+        size_t n = sorted_scores.size();
+        size_t count = std::min<size_t>(3, n);
+
+        std::cout << "Candidates: " << n << '\n';
+
+        std::cout << "Top " << count << " best scores:\n";
+        for (size_t i = 0; i < count; ++i)
+            std::cout << "  " << sorted_scores[n - 1 - i] << '\n';
+
+        std::cout << "Top " << count << " worst scores:\n";
+        for (size_t i = 0; i < count; ++i)
+            std::cout << "  " << sorted_scores[i] << '\n';
+
         std::cout << "Scores mean: " << mean << '\n';
 
         // Remove candidates with fitness evaluation below the mean
